@@ -5,13 +5,50 @@
 //  Created by Tausif Qureshi on 2022-10-26.
 //
 
+/*
+ Go back to project 2 and replace the Image view used for flags with a new FlagImage() view that renders one flag image using the specific set of modifiers we had.
+
+ */
+
 import SwiftUI
+
+
+// Day 24: Challenge #2
+struct FlagImage:  View {
+    
+    var countryFlag: String
+    
+    var body: some View {
+        Image(countryFlag)
+            .renderingMode(.original)
+            .clipShape(Capsule())
+            .shadow(radius: 5)
+    }
+}
+
+
+// Day 24: Challenge #3
+struct BlueTitle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundColor(.blue)
+            .font(.largeTitle)
+    }
+}
+
+extension View {
+    func appliedBlueTitle() -> some View {
+        modifier(BlueTitle())
+    }
+}
+
 
 struct ContentView: View {
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var score = 0
-    @State private var questionNumber = 8
+    @State private var questionNumber = 1
+    
     
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     
@@ -32,7 +69,7 @@ struct ContentView: View {
                     VStack {
                         Spacer()
                         Text("Question \(questionNumber) of 8")
-                            .font(.title.bold())
+                            .appliedBlueTitle()
                         Spacer()
                         Text("Tap the flag of")
                             .foregroundStyle(.secondary)
@@ -46,10 +83,7 @@ struct ContentView: View {
                         Button{
                             flagTapped(number)
                         } label: {
-                            Image(countries[number])
-                                .renderingMode(.original)
-                                .clipShape(Capsule())
-                                .shadow(radius: 5)
+                            FlagImage(countryFlag: countries[number])
                         }
                     }
                 }
@@ -70,11 +104,10 @@ struct ContentView: View {
             .padding()
         }
         .alert(scoreTitle, isPresented: $showingScore) {
-            if questionNumber < 8 {
-                Button("Continue", action: askQuestion)
-            } else if questionNumber == 8 {
-                Button("Restart Game",role: .destructive, action: restartGame)
-            }
+            
+            Button( questionNumber < 8 ? "Continue" : "Restart Game" , role: questionNumber == 8 ? .destructive : .none , action: questionNumber < 8 ? askQuestion : restartGame)
+            
+            
         } message: {
             if questionNumber < 8 {
                 Text("Your score is \(score)")
